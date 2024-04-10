@@ -1,10 +1,10 @@
 # Simple LDAP2PG Configuration using OpenLDAP
 
 # Table of Contents
-[Overview and Prerequisites](#overview-and-prerequisites)
-[Install and Configure Open LDAP](#install-and-configure-open-ldap) 
-[Install and Configure Open LDAP](#install-and-configure-ldap2pg) 
-[Create OpenLDAP Roles and Users](#create-openldap-roles-and-users)
+[Overview and Prerequisites](#overview-and-prerequisites)<br>
+[Install and Configure Open LDAP](#install-and-configure-open-ldap) <br>
+[Install and Configure Open LDAP](#install-and-configure-ldap2pg) <br>
+[Create OpenLDAP Roles and Users](#create-openldap-roles-and-users)<br>
 [ldap2pg Validation](#ldap2pg-validation)
 
 ## Overview and Prerequisites
