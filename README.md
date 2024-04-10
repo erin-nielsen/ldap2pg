@@ -5,8 +5,7 @@
 [Install and Configure OpenLDAP](#install-and-configure-open-ldap) <br>
 [Create OpenLDAP Roles and Users](#create-openldap-roles-and-users)<br>
 [Install and Configure ldap2pg](#install-and-configure-ldap2pg) <br>
-
-[ldap2pg Validation](#ldap2pg-validation)
+[ldap2pg Demonstration](#ldap2pg-demonstration)
 
 ## Overview and Prerequisites
 The procedures detailed below will allow you to demonstrate the LDAP2PG synchronization.  Specifically these procedures will allow you to:
@@ -39,40 +38,67 @@ The procedures detailed below will allow you to demonstrate the LDAP2PG synchron
 		ldapsearch -H ldap://localhost -W -U admin -b "cn=admin,dc=edb,dc=example,dc=org"
 		
 ## Create OpenLDAP Roles and Users
-The following steps describe how to create 2 new roles and 2 users within these roles within your OpenLDAP instance.
+The following steps describe how to create the new sample roles and users within your OpenLDAP instance.
+
+1. Copy all files from this project's repository folder to a folder on your OpenLDAP node:
+
+		/ldap2pg/openldap-scripts
  
-1. Add Organization groups
+2. Execute the following command to add the organization "groups". (Enter the password for the LDAP user you set up in this example it is "admin")
 
 		ldapadd -x -D "cn=admin,dc=edb,dc=example,dc=org" -W -f ldap-scripts/create_ou.ldif
 
-2. Create hr and marketing groups
+3. Execute the following command to add the groups "hr" and "marketing". (Enter the password for the LDAP user you set up in this example it is "admin")
 
 		ldapadd -x -D "cn=admin,dc=edb,dc=example,dc=org" -W -f ldap-scripts/create_groups.ldif
 
-3. Create users
+4. Execute the following command to create all the users. (Enter the password for the LDAP user you set up in this example it is "admin")
 
 		ldapadd -x -D "cn=admin,dc=edb,dc=example,dc=org" -W -f ldap-scripts/create_users.ldif
 
-4. Add users to groups
+5. Execute the following command to add the users to the appropriate groups. (Enter the password for the LDAP user you set up in this example it is "admin")
 
 		ldapmodify -x -D "cn=admin,dc=edb,dc=example,dc=org" -W -f ldap-scripts/add_users_to_groups.ldif
 		
-## Install and Configure ldap2pg
-1. Log onto the node you wish to run the ldap2pg application.
+6. Execute the following command to validate groups and users were successfully created.
+	
+		ldapsearch -x -LLL -b "ou=groups,dc=edb,dc=example,dc=org" "(|(cn=hr)(cn=marketing))"
 
-2.  Create a user that has a login to the PostgreSQL database as an unprivileged role with CREATEDB and CREATEROLE privileges, for example ldap2pguser.  As stated in the prerequisites ensure that the node running ldap2pg has access to the PostgreSQL database.
+2. This should yield the result:
+
+		dn: cn=marketing,ou=groups,dc=edb,dc=example,dc=org
+		objectClass: posixGroup
+		cn: marketing
+		gidNumber: 5001
+		description: Marketing
+		memberUid: uid=marketinguser1,ou=groups,dc=edb,dc=example,dc=org
+		memberUid: uid=marketinguser2,ou=groups,dc=edb,dc=example,dc=org
+		memberUid: uid=marketinguser3,ou=groups,dc=edb,dc=example,dc=org
+		
+		dn: cn=hr,ou=groups,dc=edb,dc=example,dc=org
+		objectClass: posixGroup
+		cn: hr
+		gidNumber: 5000
+		description: Human Resources
+		memberUid: uid=hruser1,ou=groups,dc=edb,dc=example,dc=org
+		memberUid: uid=hruser2,ou=groups,dc=edb,dc=example,dc=org
+		
+## Install and Configure ldap2pg
+1.  Create a user that has a login to the PostgreSQL database as an unprivileged role with CREATEDB and CREATEROLE privileges.  As stated in the prerequisites ensure that the node running ldap2pg has access to the PostgreSQL database.
+
+2. Log onto the node you wish to run the ldap2pg application.
 
 3. Download and install [ldap2pg](https://ldap2pg.readthedocs.io/en/latest/) as an administrator. 
 
-4. **Configure PostgreSQL Connection Settings**  If only one PostgreSQL instance database will be synchronized you may set the global environment variables for the user who is performing the synchronization. Replace the following variables to match your environment. Alternatively, in step #7 below you may include them in the synchronization scripts if multiple PostgreSQL instances and YAML files are needed.
+4. **Configure PostgreSQL Connection Settings**  If only one PostgreSQL instance database will be synchronized you may set the global environment variables for the user who is performing the synchronization. Replace the following variables to match your environment using the user created in step #1. Alternatively, in step #7 below you may include them in the synchronization scripts if multiple PostgreSQL instances and YAML files are needed.
 
 		export PGUSER=ldap2pguser
 		export PGPASSWORD='<password>'
 		export PGDATABASE=postgres
 		export PGPORT=5444
 	
-4. **Create LDAP Connection Config File** Create an LDAP configuration file.  You may create the LDAP configuration file anywhere by setting the environment variable:  **export LDAPCONF=/path/to/your/ldap.conf**  <br>  
-If you do not, ldap2pg will look for an LDAP configuration file for connection information in the following order:  
+4. **Create LDAP Connection Config File** You may create the LDAP configuration file anywhere by setting the environment variable:  **export LDAPCONF=/path/to/your/ldap.conf**  <br>  
+If you do not, when running ldap2pg, it will look for an LDAP configuration file for connection information in the following order:  
 	
 		path=/etc/ldap/ldap.conf
 		path=/var/lib/edb-as/ldaprc 
@@ -80,7 +106,7 @@ If you do not, ldap2pg will look for an LDAP configuration file for connection i
 		path=/var/lib/edb-as/ldap2pg/ldaprc  
 		path=/path/to/your/ldap.conf 
 		
-5. **Configure LDAP Connection Config File** Configure the contents of the LDAP configuration file where ldap2pg will retrieve the connection information from.  The key take away here is you must use **PASSWORD** token to indicate the password for the LDAP authentication.
+5. **Configure LDAP Connection Config File** Configure the contents of the LDAP configuration file where ldap2pg will retrieve the LDAP connection information.  The key take away here is you MUST use the **PASSWORD** token to indicate the password for the LDAP authentication.
     
 		BASE	  dc=edb,dc=example,dc=org
 		URI	  ldap://ldap.enterprisedb.com
@@ -102,7 +128,10 @@ If you do not, ldap2pg will look for an LDAP configuration file for connection i
 		
 		ldap2pg --config ldap2pg.yml
 
-8. **Configure the ldap2pg.yml File** The ldap2pg.yml defines the scope and search criterion for syncing the LDAP groups and users to the PostgreSQL databases.  The ldap2pg.yml may be used as is, except for the postgres section.  List those roles you do not want to be synced separated by commas, list the databases that pertain to this synchronization separated by commas, and list the schemas that pertain to the synchronization.
+8. **Configure the ldap2pg.yml File** The ldap2pg.yml defines the scope and search criterion for syncing the LDAP groups and users to the PostgreSQL databases.  The ldap2pg.yml may be used as is, except for the postgres mapping.  
+-List those roles you do not want to be synced separated by commas using the * as a wildcard.
+-List the databases that pertain to this synchronization separated by commas
+-List the schemas that pertain to the synchronization.
 
 		postgres:
 		  roles_blacklist_query: [admin,PostgreSQL, pg_*,bdr*,replication*,barman*,test*,aq*,streaming*,pgd*]
@@ -120,10 +149,7 @@ If you do not, ldap2pg will look for an LDAP configuration file for connection i
 		06:14:50 INFO   Running as superuser.                            user=ldap2pguser super=false server="PostgreSQL 15.6" cluster=dc-pgd1 database=postgres
 		06:14:50 INFO   Connected to LDAP directory.                     uri=ldap://example.com authzid="dn:cn=admin,dc=edb,dc=example,dc=org"
 
-
-
-
-## ldap2pg Validation
+## ldap2pg Demonstration
 The specific steps you will follow during a demo depend to some degree on the ldap2pg configuration you have deployed.  The following steps are a general guideline on how to perform the demonstration. 
 
 ### View Groups and Users in LDAP
@@ -153,7 +179,7 @@ Perform the following steps from the ldap2pg node.
 		memberUid: uid=hruser2,ou=groups,dc=edb,dc=example,dc=org
 
 ### View Current Roles and Users in PostgreSQL Database
-Obtain a database session to the PostgreSQL database you are syncronizing with.  Perform the following steps to view the current set of roles and users.
+Obtain a database session to the PostgreSQL database you are synchronizing with.  Perform the following steps to view the current set of roles and users.
 	
 1. Show current roles, making note that these LDAP users and groups do not yet exist.
 	
@@ -170,7 +196,7 @@ Obtain a database session to the PostgreSQL database you are syncronizing with. 
 	
 		\dp <table name>
 	
-### Run the Validation and 
+### Run the Validation and Synchronization
 	
 1. Run the Validate Config.  Discuss how it verifies connection to ldap then to PostgreSQL, then finally performing the synchronization listing all the tasks it will perform
 and that this is just a preview.  In the script you'll notice that the export statements are added here instead of at the user profile this is because will corrupt your PGD cluster.
@@ -181,7 +207,8 @@ and that this is just a preview.  In the script you'll notice that the export st
 	
 		./ldap2pg/syncldap.sh
 	
-### **Terminal 2 - psql**
+###  View Newly Created Roles and Users in PostgreSQL Database
+Obtain a database session to the PostgreSQL database you are synchronizing with.  Perform the following steps to view the set of roles and users.  You should now see the newly created roles and users.
 	
 1. Show Results of newly added roles and users
 
@@ -191,13 +218,33 @@ and that this is just a preview.  In the script you'll notice that the export st
 		FROM pg_roles r
 		JOIN pg_auth_members m ON r.oid = m.roleid
 		JOIN pg_roles u ON m.member = u.oid;
+		
+2. Results should now show new hr and marketing roles as well as the users within it.
+
+		      role_name       |  member_username
+		----------------------+--------------------
+		 marketing            | marketinguser2
+		 marketing            | marketinguser1
+		 marketing            | marketinguser3
+		 hr                   | hruser2
+		 hr                   | hruser1
 	
-2. Show that the employees table has read permission for marketing and read/write for HR
+3. Show that a table that was synchronized has read permission for marketing and read/write for HR. 
 	
-		\dp employees
+		\dp <table name>
+		
+4. The following is an example if there was a table named employees.
+
+		bdrdb=# \dp employees
+		                                       Access privileges
+		 Schema |   Name    | Type  |         Access privileges         | Column privileges | Policies
+		--------+-----------+-------+-----------------------------------+-------------------+----------
+		 public | employees | table | enterprisedb=arwdDxt/enterprisedb+|                   |
+		        |           |       | marketing=r/enterprisedb         +|                   |
+		        |           |       | hr=rw/enterprisedb                |                   |
+		(1 row)
 	
-### **View ldap2pg.yml**
-1. Open and Discuss ldap2pg.yml 
+
 
 ## Demo Cleanup
 This removes the new users and groups from PostgreSQL database synced with ldap so you can run the demo again.
