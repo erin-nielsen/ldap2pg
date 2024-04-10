@@ -5,7 +5,8 @@
 [Install and Configure OpenLDAP](#install-and-configure-open-ldap) <br>
 [Create OpenLDAP Roles and Users](#create-openldap-roles-and-users)<br>
 [Install and Configure ldap2pg](#install-and-configure-ldap2pg) <br>
-[ldap2pg Demonstration](#ldap2pg-demonstration)
+[ldap2pg Demonstration](#ldap2pg-demonstration) <br>
+[Remove Newly Created Roles and Users from PostgreSQL Database](#remove-newly-created-roles-and-users-from-postgresql-database)
 
 ## Overview and Prerequisites
 The procedures detailed below will allow you to demonstrate the LDAP2PG synchronization.  Specifically these procedures will allow you to:
@@ -18,7 +19,6 @@ The procedures detailed below will allow you to demonstrate the LDAP2PG synchron
 - You will need to have ldap2pg installed.  Download binary from the following location: [ldap2pg](https://ldap2pg.readthedocs.io/en/latest/) 
 - You will need to have an user created that has access to LDAP to view the users and groups in the Distingished Name(DN) that is being synced with PostgreSQL and also have access to your PostgreSQL database with privileges to create, revoke users and roles from tables, schemas and databases.
 - Ensure that the node where the ldap2pg application is installed has access to both the LDAP instance as well as the PostgreSQL databases for synchronization.
-
 <br>
 
 ## Install and Configure Open LDAP 
@@ -97,7 +97,8 @@ The following steps describe how to create the new sample roles and users within
 		export PGDATABASE=postgres
 		export PGPORT=5444
 	
-4. **Create LDAP Connection Config File** You may create the LDAP configuration file anywhere by setting the environment variable:  **export LDAPCONF=/path/to/your/ldap.conf**  <br>  
+4. **Create LDAP Connection Config File** You may create the LDAP configuration file anywhere by setting the environment variable:  
+-**export LDAPCONF=/path/to/your/ldap.conf**  <br>  
 If you do not, when running ldap2pg, it will look for an LDAP configuration file for connection information in the following order:  
 	
 		path=/etc/ldap/ldap.conf
@@ -150,12 +151,11 @@ If you do not, when running ldap2pg, it will look for an LDAP configuration file
 		06:14:50 INFO   Connected to LDAP directory.                     uri=ldap://example.com authzid="dn:cn=admin,dc=edb,dc=example,dc=org"
 
 ## ldap2pg Demonstration
-The specific steps you will follow during a demo depend to some degree on the ldap2pg configuration you have deployed.  The following steps are a general guideline on how to perform the demonstration. 
+The following sections demonstrate the steps to synchronize roles and users between OpenLDAP and a PostgreSQL database.
+
 
 ### View Groups and Users in LDAP
-Perform the following steps from the ldap2pg node.
-	
-1. Show the 2 groups and 5 users that currently exist in Open LDAP.
+1.  From the OpenLDAP node list the users that exist in the hr and marketing groups by executing the command:
 	
 		ldapsearch -x -LLL -b "ou=groups,dc=edb,dc=example,dc=org" "(|(cn=hr)(cn=marketing))"
 
@@ -179,38 +179,37 @@ Perform the following steps from the ldap2pg node.
 		memberUid: uid=hruser2,ou=groups,dc=edb,dc=example,dc=org
 
 ### View Current Roles and Users in PostgreSQL Database
-Obtain a database session to the PostgreSQL database you are synchronizing with.  Perform the following steps to view the current set of roles and users.
+1. Obtain a database session to the PostgreSQL database you are synchronizing with.  
 	
-1. Show current roles, making note that these LDAP users and groups do not yet exist.
+2. Execute the following command to show the current roles, making note that the OpenLDAP users and groups do not yet exist.
 	
 		\du
 	
-2. Show the members that exist for each role within the database.  Again, noting that these LDAP users and groups do not yet exist.
+2. Execute the following command to show the members that exist for each role within the database.  Again, noting that these LDAP users and groups do not yet exist.
 	
 		SELECT r.rolname AS role_name,  u.rolname AS member_username
 		FROM pg_roles r
 		JOIN pg_auth_members m ON r.oid = m.roleid
 		JOIN pg_roles u ON m.member = u.oid;
 	
-3. Show table privileges on a table that will be included in the synchronization.  Again, noticing that new roles and users do not have any privileges.  
+3. Execute the following command to show the privileges on a table that will be included in the synchronization.  Again, noticing that new roles and users do not have any privileges.  
 	
 		\dp <table name>
 	
 ### Run the Validation and Synchronization
 	
-1. Run the Validate Config.  Discuss how it verifies connection to ldap then to PostgreSQL, then finally performing the synchronization listing all the tasks it will perform
-and that this is just a preview.  In the script you'll notice that the export statements are added here instead of at the user profile this is because will corrupt your PGD cluster.
+1. **Validate Synchronization**  Execute the following script to validate the synchronization of the roles and users.  The output should indicate the creation of the hr, marketing roles and all the new users.  
 	
 		./ldap2pg/configldap.sh
 	
-2. Run the LDAP sync.  Discuss this actually performs the tasks outlined in the config.r
+2. **Execute Synchronization** Now that the synchronization results have been reviewed and validated, execute the following command to synchronize the roles and users. 
 	
 		./ldap2pg/syncldap.sh
 	
 ###  View Newly Created Roles and Users in PostgreSQL Database
-Obtain a database session to the PostgreSQL database you are synchronizing with.  Perform the following steps to view the set of roles and users.  You should now see the newly created roles and users.
+1. Obtain a database session to the PostgreSQL database you are synchronizing with. 
 	
-1. Show Results of newly added roles and users
+2. Execute the following commands to list the roles and users within the database.  
 
 		\du
 		
@@ -219,7 +218,7 @@ Obtain a database session to the PostgreSQL database you are synchronizing with.
 		JOIN pg_auth_members m ON r.oid = m.roleid
 		JOIN pg_roles u ON m.member = u.oid;
 		
-2. Results should now show new hr and marketing roles as well as the users within it.
+3. Review the results that should now show new hr and marketing roles as well as the users within it were created in the PostgreSQL database.
 
 		      role_name       |  member_username
 		----------------------+--------------------
@@ -229,11 +228,11 @@ Obtain a database session to the PostgreSQL database you are synchronizing with.
 		 hr                   | hruser2
 		 hr                   | hruser1
 	
-3. Show that a table that was synchronized has read permission for marketing and read/write for HR. 
+4. Execute the following command to describe the privileges on a table that was synchronized by ldap2pg.  
 	
 		\dp <table name>
 		
-4. The following is an example if there was a table named employees.
+5. Review the results that should now show that the marketing role has READ permission and the hr role has READ-WRITE permission which is what was indicated in the ldap2pg.yml file. The following is an example of a table named employees that was synchronized.
 
 		bdrdb=# \dp employees
 		                                       Access privileges
@@ -246,10 +245,18 @@ Obtain a database session to the PostgreSQL database you are synchronizing with.
 	
 
 
-## Demo Cleanup
-This removes the new users and groups from PostgreSQL database synced with ldap so you can run the demo again.
+## Remove Newly Created Roles and Users from PostgreSQL Database 
+This section describes how to "clean-up" your database to run this procedure again if needed.
 
-	bdrdb=# \i  psql-scripts/revoke-priv-role.sql
+1. Copy the file from this project's repository folder to a folder on your PostgreSQL node:
+
+		/ldap2pg/psql-scripts/revoke-priv-roles.sql
+
+2. Obtain a database session to the PostgreSQL database you are synchronizing with. 
+	
+3. Execute the following command to remove the newly created marketing and hr roles and their users from the PostgreSQL database.
+
+		\i  psql-scripts/revoke-priv-roles.sql
 
 
 
