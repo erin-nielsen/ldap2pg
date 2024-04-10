@@ -9,16 +9,13 @@
 [Remove Newly Created Roles and Users from PostgreSQL Database](#remove-newly-created-roles-and-users-from-postgresql-database)
 
 ## Overview and Prerequisites
-The procedures detailed below will allow you to demonstrate the LDAP2PG synchronization.  Specifically these procedures will allow you to:
-1. **Set up a Read-Only Role**:  You will set up a group within your OpenLDAP instance for read-only users and add 3 users to this group. This will be the Marketing group.
-2. **Set up a Read-Write Role**: You will set up a group within your OpenLDAP instance for read-write users and add 2 users to this group. This will be the HR group.
-3. **Use a predefined ldap2pg configuration** A ldap2pg YML configuration example is provided to run the synchronization of the roles and users to your PostgreSQL database schema.
+The procedures detailed below will allow you to demonstrate the LDAP2PG synchronization between an OpenLDAP instance and a PostgreSQL instance.  
 
 **Prerequisites**
-- You will need to have an LDAP server such as [OpenLDAP](https://www.openldap.org/) instance installed.
-- You will need to have ldap2pg installed.  Download binary from the following location: [ldap2pg](https://ldap2pg.readthedocs.io/en/latest/) 
-- You will need to have an user created that has access to LDAP to view the users and groups in the Distingished Name(DN) that is being synced with PostgreSQL and also have access to your PostgreSQL database with privileges to create, revoke users and roles from tables, schemas and databases.
-- Ensure that the node where the ldap2pg application is installed has access to both the LDAP instance as well as the PostgreSQL databases for synchronization.
+- You will need to have a node available to install the OpenLDAP server.  
+- You will need to have a node available to install the ldap2pg application.  
+- You will need to have a node with a PostgreSQL database installed.
+- Ensure that the node where the ldap2pg application is installed has access to both the OpenLDAP instance as well as the PostgreSQL databases for synchronization.
 <br>
 
 ## Install and Configure Open LDAP 
@@ -33,34 +30,34 @@ The procedures detailed below will allow you to demonstrate the LDAP2PG synchron
 		cn=admin
 		password = admin
 	
-3. Test the connection to LDAP on the same server it was installed using the following command.  If ldapsearch does not exist, then install **openlap-clients** for Red Hat-based distributions or **ldap-utils** for Debian-based distributions.
+3. Test the connection to OpenLDAP on the same server it was installed using the following command.  If ldapsearch does not exist, then install **openlap-clients** for Red Hat-based distributions or **ldap-utils** for Debian-based distributions.
 
 		ldapsearch -H ldap://localhost -W -U admin -b "cn=admin,dc=edb,dc=example,dc=org"
 		
 ## Create OpenLDAP Roles and Users
-The following steps describe how to create the new sample roles and users within your OpenLDAP instance.
+The following steps describe how to create the new sample roles and users within your OpenLDAP instance for this demonstration.
 
-1. Copy all files from this project's repository folder to a folder on your OpenLDAP node:
+1. Copy all files from this repository folder to a folder on your OpenLDAP node:
 
 		/ldap2pg/openldap-scripts
  
-2. Execute the following command to add the organization "groups". (Enter the password for the LDAP user you set up in this example it is "admin")
+2. Execute the following command to add the organization "groups". (Enter the password for the OpenLDAP user you set up in this example it is "admin")
 
 		ldapadd -x -D "cn=admin,dc=edb,dc=example,dc=org" -W -f ldap-scripts/create_ou.ldif
 
-3. Execute the following command to add the groups "hr" and "marketing". (Enter the password for the LDAP user you set up in this example it is "admin")
+3. Execute the following command to add the groups "hr" and "marketing". (Enter the password for the OpenLDAP user you set up in this example it is "admin")
 
 		ldapadd -x -D "cn=admin,dc=edb,dc=example,dc=org" -W -f ldap-scripts/create_groups.ldif
 
-4. Execute the following command to create all the users. (Enter the password for the LDAP user you set up in this example it is "admin")
+4. Execute the following command to create all the users. (Enter the password for the OpenLDAP user you set up in this example it is "admin")
 
 		ldapadd -x -D "cn=admin,dc=edb,dc=example,dc=org" -W -f ldap-scripts/create_users.ldif
 
-5. Execute the following command to add the users to the appropriate groups. (Enter the password for the LDAP user you set up in this example it is "admin")
+5. Execute the following command to add the users to the appropriate groups. (Enter the password for the OpenLDAP user you set up in this example it is "admin")
 
 		ldapmodify -x -D "cn=admin,dc=edb,dc=example,dc=org" -W -f ldap-scripts/add_users_to_groups.ldif
 		
-6. Execute the following command to validate groups and users were successfully created.
+6. Execute the following command to validate the OpenLDAP groups and users were successfully created.
 	
 		ldapsearch -x -LLL -b "ou=groups,dc=edb,dc=example,dc=org" "(|(cn=hr)(cn=marketing))"
 
@@ -84,13 +81,13 @@ The following steps describe how to create the new sample roles and users within
 		memberUid: uid=hruser2,ou=groups,dc=edb,dc=example,dc=org
 		
 ## Install and Configure ldap2pg
-1.  Create a user that has a login to the PostgreSQL database as an unprivileged role with CREATEDB and CREATEROLE privileges.  As stated in the prerequisites ensure that the node running ldap2pg has access to the PostgreSQL database.
+1.  Within your PostgreSQL instance, create a user as an unprivileged role with CREATEDB and CREATEROLE privileges.  As stated in the prerequisites ensure that this ldap2pg node has access to the PostgreSQL database to connect with this user.
 
 2. Log onto the node you wish to run the ldap2pg application.
 
 3. Download and install [ldap2pg](https://ldap2pg.readthedocs.io/en/latest/) as an administrator. 
 
-4. **Configure PostgreSQL Connection Settings**  If only one PostgreSQL instance database will be synchronized you may set the global environment variables for the user who is performing the synchronization. Replace the following variables to match your environment using the user created in step #1. Alternatively, in step #7 below you may include them in the synchronization scripts if multiple PostgreSQL instances and YAML files are needed.
+4. **Configure PostgreSQL Connection Settings**  If only one PostgreSQL instance database will be synchronized you may set the following global environment variables for the PostgreSQL user. Replace the following variables to match your environment using the user created in step #1. Alternatively, in step #7 below, you may choose to include these settings in the synchronization scripts if multiple PostgreSQL instances and YAML files are needed.
 
 		export PGUSER=ldap2pguser
 		export PGPASSWORD='<password>'
@@ -107,7 +104,7 @@ If you do not, when running ldap2pg, it will look for an LDAP configuration file
 		path=/var/lib/edb-as/ldap2pg/ldaprc  
 		path=/path/to/your/ldap.conf 
 		
-5. **Configure LDAP Connection Config File** Configure the contents of the LDAP configuration file where ldap2pg will retrieve the LDAP connection information.  The key take away here is you MUST use the **PASSWORD** token to indicate the password for the LDAP authentication.
+5. **Configure LDAP Connection Config File** Configure the contents of the LDAP configuration file where the ldap2pg application will retrieve the connection information.  The key take away here is you MUST use the **PASSWORD** token to indicate the password for the LDAP authentication.
     
 		BASE	  dc=edb,dc=example,dc=org
 		URI	  ldap://ldap.enterprisedb.com
@@ -118,7 +115,7 @@ If you do not, when running ldap2pg, it will look for an LDAP configuration file
 
 		/ldap2pg/ldap2pg-config
 		
-7. Update the environment variables in each of the SH scripts to match your environment or delete them if you are using the global settings defined in step #3.  An example of the contents of one of the scripts is the following:
+7. Update the environment variables in each of the SH scripts to match your environment or delete them if you are using the global settings defined in step #4.  An example of the contents of one of the SH scripts is the following:
 
 		#!/bin/bash
 		
@@ -129,10 +126,10 @@ If you do not, when running ldap2pg, it will look for an LDAP configuration file
 		
 		ldap2pg --config ldap2pg.yml
 
-8. **Configure the ldap2pg.yml File** The ldap2pg.yml defines the scope and search criterion for syncing the LDAP groups and users to the PostgreSQL databases.  The ldap2pg.yml may be used as is, except for the postgres mapping.  
+8. **Configure the ldap2pg.yml File** The ldap2pg.yml defines the scope and search criterion for syncing the LDAP groups and users to the PostgreSQL databases.  The ldap2pg.yml may be used as is, except for the postgres mapping section.  
 -List those roles you do not want to be synced separated by commas using the * as a wildcard.
--List the databases that pertain to this synchronization separated by commas
--List the schemas that pertain to the synchronization.
+-List the databases you want to include in the ldap search synchronization.
+-List the schemas you want to include in the ldap search synchronization.
 
 		postgres:
 		  roles_blacklist_query: [admin,PostgreSQL, pg_*,bdr*,replication*,barman*,test*,aq*,streaming*,pgd*]
@@ -143,7 +140,7 @@ If you do not, when running ldap2pg, it will look for an LDAP configuration file
 
 		ldap2pg --config ldapp2pg/ldap2pg.yml
 
-10. An example output that indicates a successful connection to the PostgreSQL database and LDAP instance is the following:
+10. An example output that indicates a successful connection to the PostgreSQL database and the  OpenLDAP instance is the following:
 
 		06:14:50 INFO   Starting ldap2pg                                 version=v6.0 runtime=go1.20.5 commit=023e6933
 		06:14:50 INFO   Using YAML configuration file.                   path=ldap2pg.yml
@@ -151,11 +148,11 @@ If you do not, when running ldap2pg, it will look for an LDAP configuration file
 		06:14:50 INFO   Connected to LDAP directory.                     uri=ldap://example.com authzid="dn:cn=admin,dc=edb,dc=example,dc=org"
 
 ## ldap2pg Demonstration
-The following sections demonstrate the steps to synchronize roles and users between OpenLDAP and a PostgreSQL database.
+The following sub-sections describe the steps to synchronize roles and users between OpenLDAP and a PostgreSQL database.
 
 
 ### View Groups and Users in LDAP
-1.  From the OpenLDAP node list the users that exist in the hr and marketing groups by executing the command:
+1.  From the OpenLDAP node list the users that exist in the hr and marketing groups previously created by executing the command:
 	
 		ldapsearch -x -LLL -b "ou=groups,dc=edb,dc=example,dc=org" "(|(cn=hr)(cn=marketing))"
 
@@ -201,6 +198,9 @@ The following sections demonstrate the steps to synchronize roles and users betw
 1. **Validate Synchronization**  Execute the following script to validate the synchronization of the roles and users.  The output should indicate the creation of the hr, marketing roles and all the new users.  
 	
 		./ldap2pg/configldap.sh
+		
+![image](resources/configure.png)
+		
 	
 2. **Execute Synchronization** Now that the synchronization results have been reviewed and validated, execute the following command to synchronize the roles and users. 
 	
