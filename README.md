@@ -1,10 +1,11 @@
 # Simple LDAP2PG Configuration using OpenLDAP
 
 # Table of Contents
-1. [Overview and Prerequisites](overview-and-prerequisites)
-2. [Install and Configure Open LDAP](install-and-configure-open-ldap) 
-3. [Create OpenLDAP Roles and Users](create-openldap-roles-and-users)
-4. [Performing ldap2pg Demonstration](performing-ldap2pg-demonstration)
+[Overview and Prerequisites](#overview-and-prerequisites)
+[Install and Configure Open LDAP](#install-and-configure-open-ldap) 
+[Install and Configure Open LDAP](#install-and-configure-ldap2pg) 
+[Create OpenLDAP Roles and Users](#create-openldap-roles-and-users)
+[ldap2pg Validation](#ldap2pg-validation)
 
 ## Overview and Prerequisites
 The procedures detailed below will allow you to demonstrate the LDAP2PG synchronization.  Specifically these procedures will allow you to:
@@ -36,7 +37,6 @@ The procedures detailed below will allow you to demonstrate the LDAP2PG synchron
 
 		ldapsearch -H ldap://localhost -W -U admin -b "cn=admin,dc=edb,dc=example,dc=org"
 		
-
 ## Install and Configure ldap2pg
 1. As an administrator install ldap2pg.  I installed this on a dat anode.  I do not recommend this due to step #3.
 
@@ -98,85 +98,55 @@ The following steps describe how to create 2 new roles and 2 users within these 
 
 		ldapmodify -x -D "cn=admin,dc=edb,dc=example,dc=org" -W -f ldap-scripts/add_users_to_groups.ldif
 
-## Configure Postgres Database
 
-Create the following table and populate:
-
-	CREATE TABLE employees (
-	    id SERIAL PRIMARY KEY,
-	    name VARCHAR(100),
-	    age INTEGER,
-	    salary NUMERIC(10, 2)
-	);
-	
-	INSERT INTO employees (name, age, salary) VALUES
-	('John Doe', 30, 50000.00),
-	('Jane Smith', 35, 60000.00),
-	('Alice Johnson', 25, 45000.00),
-	('Bob Brown', 40, 70000.00),
-	('Emily Davis', 28, 55000.00);
-
-
-
-## Demo Preparation
-This discusses any preparation prior to the demonstration.  Open 3 terminals.
-
-**Terminal 1 - admin**
-	
-	~/Doc/Training>./tsh.sh
-	cd democluster
-	ssh -F ssh_config dc-pgd1
-
-**Terminal 2 - psql**
-	
-	~/Doc/Training>./tsh.sh
-	cd democluster
-	ssh -F ssh_config dc-pgd1
-	sudo su - enterprisedb
-	psql
-	
-**Terminal 3 - enterprisedb**
-
-	~/Doc/Training>./tsh.sh
-	cd democluster
-	ssh -F ssh_config dc-pgd1
-	sudo su - enterprisedb
-	cd ldap2pg
-	
-**ldap2pg.yml**	<br>
-Have this file open in an editor for discussion
-   
-### Presentation Slides
-A great demo requires a solid setup to prepare the customer for what they are about to see. They should allow you explain what they will see in the demo prior to actually performing the demo.  
-Presentation does not yet exist.
-
-## Demo Execution
+## ldap2pg Validation
 The specific steps you will follow during a demo depend to some degree on the ldap2pg configuration you have deployed.  The following steps are a general guideline on how to perform the demonstration. 
 
-### **Terminal 1 - admin**
+### View Groups and Users in LDAP
+Perform the following steps from the ldap2pg node.
 	
 1. Show the 2 groups and 5 users that currently exist in Open LDAP.
 	
-		admin@dc-pgd1:~/github/se-demos/LDAP/psql-scripts$      ldapsearch -x -LLL -b "ou=groups,dc=edb,dc=example,dc=org" "(|(cn=hr)(cn=marketing))"
+		ldapsearch -x -LLL -b "ou=groups,dc=edb,dc=example,dc=org" "(|(cn=hr)(cn=marketing))"
 
-### **Terminal 2 - psql**
+2. This should yield the result:
+
+		dn: cn=marketing,ou=groups,dc=edb,dc=example,dc=org
+		objectClass: posixGroup
+		cn: marketing
+		gidNumber: 5001
+		description: Marketing
+		memberUid: uid=marketinguser1,ou=groups,dc=edb,dc=example,dc=org
+		memberUid: uid=marketinguser2,ou=groups,dc=edb,dc=example,dc=org
+		memberUid: uid=marketinguser3,ou=groups,dc=edb,dc=example,dc=org
+		
+		dn: cn=hr,ou=groups,dc=edb,dc=example,dc=org
+		objectClass: posixGroup
+		cn: hr
+		gidNumber: 5000
+		description: Human Resources
+		memberUid: uid=hruser1,ou=groups,dc=edb,dc=example,dc=org
+		memberUid: uid=hruser2,ou=groups,dc=edb,dc=example,dc=org
+
+### View Current Roles and Users in Postgres Database
+Obtain a database session to the postgres database you are syncronizing with.  Perform the following steps to view the current set of roles and users.
 	
-1. Show current users in Postgres database - highlighting these LDAP users and groups do not exist.
+1. Show current roles, making note that these LDAP users and groups do not yet exist.
 	
 		\du
 	
-2. Show current users and roles within postgres - highlighting these LDAP users and roles do not exist.
+2. Show the members that exist for each role within the database.  Again, noting that these LDAP users and groups do not yet exist.
 	
 		SELECT r.rolname AS role_name,  u.rolname AS member_username
 		FROM pg_roles r
 		JOIN pg_auth_members m ON r.oid = m.roleid
 		JOIN pg_roles u ON m.member = u.oid;
 	
-3. Show Table Privileges - highlighting that marketing and hr have no privileges.
+3. Show table privileges on a table that will be included in the synchronization.  Again, noticing that new roles and users do not have any privileges.  
 	
-		\dp employees
+		\dp <table name>
 	
-### **Terminal 3 - enterprisedb**
+### Run the Validation and 
 	
 1. Run the Validate Config.  Discuss how it verifies connection to ldap then to postgres, then finally performing the synchronization listing all the tasks it will perform
 and that this is just a preview.  In the script you'll notice that the export statements are added here instead of at the user profile this is because will corrupt your PGD cluster.
