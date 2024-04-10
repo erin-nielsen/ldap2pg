@@ -2,7 +2,7 @@ version: 6
 
 postgres:
   roles_blacklist_query: [admin,postgres, pg_*,bdr*,replication*,barman*,test*,aq*,streaming*,pgd*]
-  databases_query: [bdrdb]
+  databases_query: [postgres]
   schemas_query: [public]
 
 privileges:
