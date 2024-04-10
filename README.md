@@ -205,6 +205,8 @@ The following sub-sections describe the steps to synchronize roles and users bet
 2. **Execute Synchronization** Now that the synchronization results have been reviewed and validated, execute the following command to synchronize the roles and users. 
 	
 		./ldap2pg/syncldap.sh
+		
+![image](resources/real.png)
 	
 ###  View Newly Created Roles and Users in PostgreSQL Database
 1. Obtain a database session to the PostgreSQL database you are synchronizing with. 
