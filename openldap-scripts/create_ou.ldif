@@ -1,0 +1,3 @@
+dn: ou=groups,dc=edb,dc=example,dc=org
+objectClass: organizationalUnit
+ou: groups

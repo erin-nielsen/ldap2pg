@@ -1,0 +1,12 @@
+dn: cn=marketing,ou=groups,dc=edb,dc=example,dc=org
+changetype: modify
+add: memberUid
+memberUid: uid=marketinguser1,ou=groups,dc=edb,dc=example,dc=org
+memberUid: uid=marketinguser2,ou=groups,dc=edb,dc=example,dc=org
+memberUid: uid=marketinguser3,ou=groups,dc=edb,dc=example,dc=org
+
+dn: cn=hr,ou=groups,dc=edb,dc=example,dc=org
+changetype: modify
+add: memberUid
+memberUid: uid=hruser1,ou=groups,dc=edb,dc=example,dc=org
+memberUid: uid=hruser2,ou=groups,dc=edb,dc=example,dc=org

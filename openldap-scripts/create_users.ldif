@@ -1,0 +1,67 @@
+dn: uid=hruser1,ou=groups,dc=edb,dc=example,dc=org
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: hruser1
+uid: hruser1
+sn: User
+uidNumber: 10001
+gidNumber: 5000
+userPassword: password
+loginShell: /bin/bash
+homeDirectory: /home/hruser1
+
+dn: uid=hruser2,ou=groups,dc=edb,dc=example,dc=org
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: hruser2
+uid: hruser2
+sn: User
+uidNumber: 10002
+gidNumber: 5000
+userPassword: password
+loginShell: /bin/bash
+homeDirectory: /home/hruser2
+
+dn: uid=marketinguser1,ou=groups,dc=edb,dc=example,dc=org
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: marketinguser1
+uid: marketinguser1
+sn: User
+uidNumber: 10003
+gidNumber: 5001
+userPassword: password
+loginShell: /bin/bash
+homeDirectory: /home/marketinguser1
+
+dn: uid=marketinguser2,ou=groups,dc=edb,dc=example,dc=org
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: marketinguser2
+uid: marketinguser2
+sn: User
+uidNumber: 10004
+gidNumber: 5001
+userPassword: password
+loginShell: /bin/bash
+homeDirectory: /home/marketinguser2
+
+
+dn: uid=marketinguser3,ou=groups,dc=edb,dc=example,dc=org
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: marketinguser3
+uid: marketinguser3
+sn: User
+uidNumber: 10005
+gidNumber: 5001
+userPassword: password
+loginShell: /bin/bash
+homeDirectory: /home/marketinguser3
+
+

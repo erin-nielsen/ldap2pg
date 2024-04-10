@@ -1,0 +1,11 @@
+dn: cn=hr,ou=groups,dc=edb,dc=example,dc=org
+objectClass: posixGroup
+cn: hr
+gidNumber: 5000
+description: Human Resources
+
+dn: cn=marketing,ou=groups,dc=edb,dc=example,dc=org
+objectClass: posixGroup
+cn: marketing
+gidNumber: 5001
+description: Marketing
