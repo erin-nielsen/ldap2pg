@@ -1,4 +1,4 @@
-# Simple LDAP2PG Configuration using OpenLDAP
+# Basic LDAP2PG Configuration using OpenLDAP
 
 # Table of Contents
 [Overview and Prerequisites](#overview-and-prerequisites)<br>
