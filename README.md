@@ -6,7 +6,8 @@
 [Create OpenLDAP Roles and Users](#create-openldap-roles-and-users)<br>
 [Install and Configure ldap2pg](#install-and-configure-ldap2pg) <br>
 [ldap2pg Demonstration](#ldap2pg-demonstration) <br>
-[Remove Newly Created Roles and Users from PostgreSQL Database](#remove-newly-created-roles-and-users-from-postgresql-database)
+[Update YML to contain ALL schemas in a Database Except Public](#ldap2pg-demonstration) <br>
+[Remove Newly Created Roles and Users from PostgreSQL Database](#update-yml-file-to-include-all-schemas-except-for-public)
 
 ## Overview and Prerequisites
 The procedures detailed below will allow you to demonstrate the LDAP2PG synchronization between an OpenLDAP instance and a PostgreSQL instance.  
@@ -261,5 +262,6 @@ This section describes how to "clean-up" your database to run this procedure aga
 		\i  psql-scripts/revoke-priv-roles.sql
 
 
-
+## Update YML File to Include ALL schemas except for public 
+This section describes how to "clean-up" your database to run this procedure again if needed.
 
