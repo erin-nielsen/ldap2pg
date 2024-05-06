@@ -278,6 +278,6 @@ This section describes how to update an existing yml file to explicitly indicate
      
 4.  An example usage for calling the wrapper.sh:
 
-	``` /wrapper.sh ldap2pg.yml bdrdb```
+	``` [wrapper/wrapper.sh](wrapper/ldap2pg.yml) ldap2pg.yml bdrdb```
 
 
