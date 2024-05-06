@@ -1,0 +1,46 @@
+version: 6
+
+postgres:
+  roles_blacklist_query: [admin,postgres, pg_*,bdr*,replication*,barman*,test*,aq*,streaming*,pgd*]
+  databases_query: [bdrdb]
+  schemas_query: [public]
+
+privileges:
+  # Define `ro` privilege group with read-only grants
+  ro:
+  - __connect__
+  - __usage_on_tables__
+  - __select_on_tables__
+  - __usage_on_schemas__
+  - __usage_on_types__
+
+  # `rw` privilege group lists write-only grants
+  rw:
+  - ro
+  - __insert__
+  - __update_on_tables__
+
+rules:
+- description: "Setup static roles to sync with postgres."
+  roles:
+  - names:
+    - hr
+    - marketing
+    options: NOLOGIN
+
+  grant:
+  - privilege: ro
+    role: marketing
+    schema: "pg_toast,pg_catalog,sys,information_schema,pg_temp_1,pg_toast_temp_1,bdr,inventory"
+  - privilege: rw
+    role: hr
+    schema: "pg_toast,pg_catalog,sys,information_schema,pg_temp_1,pg_toast_temp_1,bdr,inventory"
+
+- description: "Search LDAP to create users in static roles defined."
+  ldapsearch:
+    base: "ou=groups,dc=edb,dc=example,dc=org"
+    filter: "(|(cn=hr)(cn=marketing))"
+  role:
+    name: "{memberUid.uid}"
+    options: LOGIN
+    parent: "{cn}"
