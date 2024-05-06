@@ -285,20 +285,23 @@ This section describes how to use the [wrapper/wrapper.sh](wrapper/wrapper.sh) s
 	    role: hr
 	    schema: "pg_toast,pg_catalog,sys,information_schema,pg_temp_1,pg_toast_temp_1,bdr,inventory"
 
-
-    
 1.  The [wrapper/wrapper.sh](wrapper/wrapper.sh) takes 2 parameters.
 	- **Original ldap2pg.yml File** - Path to original ldap2pg.yml file. 
-	- **Database Name** - Name of database to get all schemas, except public 
+	- **Database Name** - Name of database to get all schemas, except public.
 
-2.  The resulting yml file is created in the same directory as the wrapper.sh as new_ldap2pg.yml 
+2.  Usage for calling the wrapper.sh:
+
+   	```./wrapper.sh <Original ldap2pg.yml file> <Database Name>```
+
+	For example:
+	``` ./wrapper.sh ldap2pg.yml bdrdb```
+
+2.  As a result of running this script a new **new_ldap2pg.yml** file is created in the same directory as the wrapper.sh script.
    
-3.  You can find an example of a before and after yml files as a result of running the script:
+3.  You can find an example of the before and after yml files as a result of running the wrapper.sh script here:
    	- [wrapper/ldap2pg.yml](wrapper/ldap2pg.yml)
    	- [wrapper/new_ldap2pg.yml](wrapper/new_ldap2pg.yml)
      
-4.  An example usage for calling the wrapper.sh:
 
-	``` ./wrapper.sh ldap2pg.yml bdrdb```
 
 
