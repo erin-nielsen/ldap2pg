@@ -267,7 +267,7 @@ This section describes how to "clean-up" your database to run this procedure aga
 This section describes how to update an existing yml file to explicitly indicate all schemas within a database excluding the public schema. 
 
 1.  The wrapper/wrapper.sh takes 2 parameters.
-	- **Original ldap2pg.yml File** - Path to original ldap2pg.yml file. (wrapper/ldap2pg.yml)
+	- **Original ldap2pg.yml File** - Path to original ldap2pg.yml file. [wrapper/ldap2pg.yml](wrapper/ldap2pg.yml)
 	- **Database Name** - Name of database to get all schemas, except public (bdrdb)
 
 2.  The resulting yml file is created in the same directory as the wrapper.sh as new_ldap2pg.yml 
