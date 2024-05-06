@@ -264,7 +264,8 @@ This section describes how to "clean-up" your database to run this procedure aga
 
 
 ## Update YML File to Include ALL schemas except for public 
-This section describes how to update an existing yml file to explicitly indicate all schemas within a database excluding the public schema. Specifically, it updates all ```schema:``` tags found in the original ldap2pg.yml file and replaces the value with all schemas within a given database specified, excluding the 'public' schema.
+This section describes how to use the [wrapper/wrapper.sh](wrapper/wrapper.sh) script to update an existing ldap2pg.yml file to explicitly indicate all schemas within a database excluding the public schema. Specifically, it updates all ```schema:``` tags found in the original ldap2pg.yml file and replaces the value with all schemas within a given database specified, excluding the 'public' schema.
+
 ### YML Snippet Before
 	  grant:
 	  - privilege: ro
