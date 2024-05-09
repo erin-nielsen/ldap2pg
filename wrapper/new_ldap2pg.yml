@@ -31,10 +31,10 @@ rules:
   grant:
   - privilege: ro
     role: marketing
-    schema: "pg_toast,pg_catalog,sys,information_schema,pg_temp_1,pg_toast_temp_1,bdr,inventory"
+    schema: [pg_toast,pg_catalog,sys,information_schema,pg_temp_1,pg_toast_temp_1,bdr,inventory]
   - privilege: rw
     role: hr
-    schema: "pg_toast,pg_catalog,sys,information_schema,pg_temp_1,pg_toast_temp_1,bdr,inventory"
+    schema: [pg_toast,pg_catalog,sys,information_schema,pg_temp_1,pg_toast_temp_1,bdr,inventory]
 
 - description: "Search LDAP to create users in static roles defined."
   ldapsearch:
