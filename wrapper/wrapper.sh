@@ -25,7 +25,7 @@ replace_schemas_tag() {
     #output list of schemas found.
     echo "Schemas found: '$schema_list'"
 
-    local updated_yaml=$(sed "s/schema:.*/schema: \"[$schema_list]\"/g" $yml_file)
+    local updated_yaml=$(sed "s/schema:.*/schema: [$schema_list]/g" $yml_file)
 
     echo "$updated_yaml" > new_ldap2pg.yml
 }
