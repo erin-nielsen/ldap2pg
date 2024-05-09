@@ -280,10 +280,10 @@ This section describes how to use the [wrapper/wrapper.sh](wrapper/wrapper.sh) s
 	  grant:
 	  - privilege: ro
 	    role: marketing
-	    schema: "pg_toast,pg_catalog,sys,information_schema,pg_temp_1,pg_toast_temp_1,bdr,inventory"
+	    schema: [pg_toast,pg_catalog,sys,information_schema,pg_temp_1,pg_toast_temp_1,bdr,inventory]
 	  - privilege: rw
 	    role: hr
-	    schema: "pg_toast,pg_catalog,sys,information_schema,pg_temp_1,pg_toast_temp_1,bdr,inventory"
+	    schema: [pg_toast,pg_catalog,sys,information_schema,pg_temp_1,pg_toast_temp_1,bdr,inventory]
 
 1.  The [wrapper/wrapper.sh](wrapper/wrapper.sh) takes 2 parameters.
 	- **Original ldap2pg.yml File** - Path to original ldap2pg.yml file. 
