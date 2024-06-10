@@ -18,7 +18,7 @@ The procedures detailed below will allow you to demonstrate the LDAP2PG synchron
 - You will need to have a node available to install the ldap2pg application.  
 - You will need to have a node with a PostgreSQL database installed.
 - Ensure that the node where the ldap2pg application is installed has access to both the OpenLDAP instance as well as the PostgreSQL databases for synchronization.
-<br>
+<br>  
 
 ## Install and Configure Open LDAP 
 1. Log onto the node you wish to run the OpenLDAP application.
